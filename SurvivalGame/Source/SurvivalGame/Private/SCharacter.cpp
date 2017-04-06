@@ -28,10 +28,10 @@ ASCharacter::ASCharacter(const class FObjectInitializer& ObjectInitializer)
 	CameraBoomComp->SocketOffset = FVector(0, 35, 0);
 	CameraBoomComp->TargetOffset = FVector(0, 0, 55);
 	CameraBoomComp->bUsePawnControlRotation = true;
-	CameraBoomComp->AttachParent = GetRootComponent();
+	CameraBoomComp->SetupAttachment(GetRootComponent());
 
 	CameraComp = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(this, TEXT("Camera"));
-	CameraComp->AttachParent = CameraBoomComp;
+	CameraComp->SetupAttachment(CameraBoomComp);
 
 	MaxUseDistance = 800;
 	bHasNewFocus = true;
@@ -176,7 +176,7 @@ ASUsableActor* ASCharacter::GetUsableInView()
 	TraceParams.bTraceComplex = true;
 
 	FHitResult Hit(ForceInit);
-	GetWorld()->LineTraceSingle(Hit, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
+	GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, TraceParams);
 
 	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f);
 
@@ -300,13 +300,6 @@ void ASCharacter::SetIsJumping(bool NewJumping)
 	}
 }
 
-
-void ASCharacter::OnLanded(const FHitResult& Hit)
-{
-	Super::OnLanded(Hit);
-
-	SetIsJumping(false);
-}
 
 void ASCharacter::ServerSetIsJumping_Implementation(bool NewJumping)
 {
