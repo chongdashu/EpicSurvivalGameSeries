@@ -117,9 +117,8 @@ void ASCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponen
 
 	InputComponent->BindAction("CrouchToggle", IE_Released, this, &ASCharacter::OnCrouchToggle);
 
-	InputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::OnStartJump);
-	InputComponent->BindAction("Jump", IE_Released, this, &ASCharacter::OnStopJump);
-
+	InputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::OnJump);
+	
 	// Interaction
 	InputComponent->BindAction("Use", IE_Pressed, this, &ASCharacter::Use);
 
@@ -262,17 +261,9 @@ float ASCharacter::GetTargetingSpeedModifier() const
 }
 
 
-void ASCharacter::OnStartJump()
+void ASCharacter::OnJump()
 {
-	bPressedJump = true;
-
 	SetIsJumping(true);
-}
-
-
-void ASCharacter::OnStopJump()
-{
-	bPressedJump = false;
 }
 
 
@@ -289,14 +280,32 @@ void ASCharacter::SetIsJumping(bool NewJumping)
 	{
 		UnCrouch();
 	}
-	else
+	else if (NewJumping != bIsJumping)
 	{
 		bIsJumping = NewJumping;
+
+		if (bIsJumping)
+		{
+			/* Perform the built-in Jump on the character */
+			Jump();
+		}
 	}
 
 	if (Role < ROLE_Authority)
 	{
 		ServerSetIsJumping(NewJumping);
+	}
+}
+
+void ASCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+
+	/* Check if we are no longer falling/jumping */
+	if (PrevMovementMode == EMovementMode::MOVE_Falling &&
+		GetCharacterMovement()->MovementMode != EMovementMode::MOVE_Falling)
+	{
+		SetIsJumping(false);
 	}
 }
 

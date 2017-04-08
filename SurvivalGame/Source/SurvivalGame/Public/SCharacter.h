@@ -42,10 +42,7 @@ public:
 	void OnCrouchToggle();
 
 	/* Client mapped to Input */
-	void OnStartJump();
-
-	/* Client mapped to Input */
-	void OnStopJump();
+	void OnJump();
 
 	/* Client mapped to Input */
 	void OnStartSprinting();
@@ -68,6 +65,8 @@ public:
 
 	UFUNCTION(Reliable, Server, WithValidation)
 	void ServerSetIsJumping(bool NewJumping);
+
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
 	/* Client/local call to update sprint state  */
 	void SetSprinting(bool NewSprinting);
